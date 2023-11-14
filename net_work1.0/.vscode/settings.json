@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "work.h": "c",
+        "head.h": "c",
+        "function.h": "c"
+    }
+}
