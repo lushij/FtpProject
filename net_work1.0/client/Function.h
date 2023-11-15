@@ -46,4 +46,4 @@ int doMkdir();
 
 int doGets();
 int doPuts();
-int transFile(int netFd, char*cmd);
+int transFile(int netFd, string cmd,string name,string md5);

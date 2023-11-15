@@ -1,11 +1,13 @@
 #include"head.h"
-// typedef struct cmd_s{
-//     int netFd;
-//     string cmd;
-// }cmd_t;
+typedef struct cmd_s{
+    int netFd;
+    string cmd;
+    string name;
+    string md5;
+}cmd_t;
 
 typedef struct task_s{
-    queue<int>task;//renwuduilie
+    queue<cmd_t>task;//renwuduilie
     pthread_mutex_t mutex;
     pthread_cond_t cond;
     int size;
@@ -16,10 +18,9 @@ typedef struct threadPool_s{
     Task tasks;
     int pthNum;
     int exitFlag;
-    char *cmd;
 }Thread;
 
 int InitThread(Thread*pTh,int workNum);
-int EnQueue(Task*tasks,int netFd);
+int EnQueue(Task*tasks,cmd_t cmd);
 int DeQueue(Task*tasks);
 int makeChild(Thread*pThread);

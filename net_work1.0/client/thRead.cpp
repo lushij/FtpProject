@@ -6,13 +6,15 @@ int InitThread(Thread*pTh,int workNum)
     pTh->pthNum=workNum;
     pTh->tid=(pthread_t*)calloc(workNum,sizeof(Thread));
     pTh->tasks.size=0;
-    pTh->cmd={0};
+    // pTh->cmd={0};
+    // pTh->name={0};
+    // pTh->tasks.task;
     pthread_mutex_init(&pTh->tasks.mutex,NULL);
     pthread_cond_init(&pTh->tasks.cond,NULL);
 }
-int EnQueue(Task*tasks,int netFd)
+int EnQueue(Task*tasks,cmd_t cmd)
 {   
-    tasks->task.push(netFd);
+    tasks->task.push(cmd);
     ++tasks->size;
 }
 int DeQueue(Task*tasks)
@@ -34,6 +36,9 @@ void *handel(void*arg)
     while(1)
     {
         int netFd;
+        string cmd;
+        string name;
+        string md5;
         while (1)
         {
             printf("I am free ,tid = %lu\n",pthread_self());
@@ -45,11 +50,14 @@ void *handel(void*arg)
             pthread_cond_wait(&pth->tasks.cond,&pth->tasks.mutex);//此函数内部有个队列，要是退出此函数会自动解锁
             }
             //现在子线程苏醒了
-            netFd=pth->tasks.task.front();//拿到队头的netFd
+            netFd=pth->tasks.task.front().netFd;//拿到队头的netFd
+            cmd = pth->tasks.task.front().cmd;
+            name=pth->tasks.task.front().name;
+            md5=pth->tasks.task.front().md5;
             DeQueue(&pth->tasks);//拿到后就弹出该元素
             pthread_cleanup_pop(1);//这个必须和pthread_cleanup_push成对出现，因为内部是个{}，否则会出现错误
             printf("I am Work ,tid = %lu\n",pthread_self());
-            transFile(netFd,pth->cmd);
+            transFile(netFd,cmd,name,md5);
             printf("done\n");
             close(netFd);
         }

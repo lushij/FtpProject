@@ -1,7 +1,7 @@
 #include "head.h"
 #include "md5.h"
 #include "Function.h"
-#include"thRead.h"
+#include "thRead.h"
 
 // unordered_map<string,string>usrToken;//存放usrname和token
 /***********************************/
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 login_begin:
     // 菜单
     system("clear");
-    void menuShow();
+    menuShow();
     int cmd = 0;
 
     scanf("%d", &cmd);
@@ -56,9 +56,9 @@ login_begin:
         // 注册
         cout << "根据提示完成注册" << endl;
         char username[128] = {0};
-    recin:
+recin:
         char *userpwd1;
-        char *userpwd2;
+        char *userpwd2;//baocun
         cout << "username:";
         cin >> username;
         for (auto ch : usrName)
@@ -71,23 +71,35 @@ login_begin:
                 goto recin;
             }
         }
+        /******************************/
         userpwd1 = getpass("userpwd:");
-        userpwd2 = getpass("Please re-enter your userpwd:");
-        if (strcmp(userpwd1, userpwd2) != 0)
+        cout<<userpwd1<<endl;
+        strcpy(userpwd2,userpwd1);
+        bzero(userpwd1,sizeof(userpwd1));
+        userpwd1 = getpass("Please re-enter your userpwd:");
+        cout<<userpwd1<<endl;
+        string upwd1(userpwd1);
+        string upwd2(userpwd2);
+        cout<<upwd2<<" "<<upwd1<<endl;
+        /*********************************/
+        if (upwd1!=upwd2)
         {
+            // cout<<ret<<endl;
             // 注册失败
             printf("两次输入不一致，即将回到主界面\n");
-            sleep(1);
+            sleep(2);
             goto login_begin;
         }
         else
         {
+            // cout<<ret<<endl;
             // 注册成功
             // user usr;
             // strcpy(usr.name, username);
             // strcpy(usr.pwd, userpwd1);
             // UserInfo.push_back(usr); // 存进数组中
-            usrName.push_back(username);
+            cout<<"successful"<<endl;
+            usrName.push_back(username);//jinxingcahchongfu
             socFd = socket(AF_INET, SOCK_STREAM, 0);
             ret = connect(socFd, (struct sockaddr *)&addr, sizeof(addr));
             ERROR_CHECK(ret, -1, "connect");
@@ -114,6 +126,18 @@ login_begin:
     else if (cmd == 3)
     {
         // 功能
+        printf("1.vip\n");
+        printf("2.tasking\n");
+        int num=0;
+        cin>>num;
+        if(num == 1)
+        {
+            printf("shifoukaitong vip\n");
+            
+        }else
+        {
+
+        }
     }
     else
     {
@@ -179,12 +203,15 @@ login_begin:
                     // pthread_create();
                      //先accept
                     int netFd=accept(socFd,NULL,NULL);
+                    string name = buf+5;
+                    string md5=0;
                     //再加锁
                     pthread_mutex_lock(&pThread.tasks.mutex);
-                    //把netFd入队
-                    EnQueue(&pThread.tasks,netFd);
+                    //把netFd cmd name入队
+                    cmd_t cmd={netFd,"gets",name,md5};
+                    EnQueue(&pThread.tasks,cmd);
                     printf("new Task\n");
-                    pThread.cmd="gets";
+                    // pThread.cmd="gets";
                     //通知
                     pthread_cond_signal(&pThread.tasks.cond);
                     //解锁
@@ -194,6 +221,30 @@ login_begin:
                 {
                     // 子线程
                     // doPuts();
+                    int netFd=accept(socFd,NULL,NULL);
+                    string name = buf+5;//tiqumingzi
+                    const char*path=name.c_str();
+                    //MD5
+                    setFileMd5(path);
+                    ret = Compute_file_md5(file_path, md5_str);
+                    // md5_str存放的就是MD5值；
+                    if (0 == ret)
+                    {
+                        printf("%s\t%s\n", md5_str, file_path);
+                    }
+                    string md5(md5_str);//tiqumd5
+                     //再加锁
+                    pthread_mutex_lock(&pThread.tasks.mutex);
+                    //把netFd cmd name入队
+                    cmd_t cmd={netFd,"puts",name,md5};
+                    EnQueue(&pThread.tasks,cmd);
+                    printf("new Task\n");
+                    // pThread.cmd="gets";
+                    //通知
+                    pthread_cond_signal(&pThread.tasks.cond);
+                    //解锁
+                    pthread_mutex_unlock(&pThread.tasks.mutex);
+
                 }
             }
             if (readArr[i].data.fd == socFd)
@@ -203,13 +254,5 @@ login_begin:
         }
     }
 
-//MD5
-    setFileMd5(argv[1]);
-    ret = Compute_file_md5(file_path, md5_str);
-    // md5_str存放的就是MD5值；
-    if (0 == ret)
-    {
-        printf("%s\t%s\n", md5_str, file_path);
-    }
-    return 0;
+
 }
