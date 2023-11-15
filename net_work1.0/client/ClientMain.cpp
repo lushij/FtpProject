@@ -86,6 +86,7 @@ recin:
         {
             // cout<<ret<<endl;
             // 注册失败
+            printf("注册失败\n");
             printf("两次输入不一致，即将回到主界面\n");
             sleep(2);
             goto login_begin;
@@ -98,8 +99,8 @@ recin:
             // strcpy(usr.name, username);
             // strcpy(usr.pwd, userpwd1);
             // UserInfo.push_back(usr); // 存进数组中
-            cout<<"successful"<<endl;
-            usrName.push_back(username);//jinxingcahchongfu
+            cout<<"注册成功"<<endl;
+            // usrName.push_back(username);//进行查重 想法应该错了，这个一次性，应该数据库
             socFd = socket(AF_INET, SOCK_STREAM, 0);
             ret = connect(socFd, (struct sockaddr *)&addr, sizeof(addr));
             ERROR_CHECK(ret, -1, "connect");
