@@ -32,10 +32,9 @@ void cleanFunc(void *arg)
 void *handel(void*arg)
 {
     Thread*pth=(Thread*)arg;
-    int netFd;
     while(1)
     {
-        int netFd;
+        int socFd;
         string cmd;
         string name;
         string md5;
@@ -50,16 +49,16 @@ void *handel(void*arg)
             pthread_cond_wait(&pth->tasks.cond,&pth->tasks.mutex);//此函数内部有个队列，要是退出此函数会自动解锁
             }
             //现在子线程苏醒了
-            netFd=pth->tasks.task.front().netFd;//拿到队头的netFd
+            socFd=pth->tasks.task.front().netFd;//拿到队头的netFd
             cmd = pth->tasks.task.front().cmd;
             name=pth->tasks.task.front().name;
             md5=pth->tasks.task.front().md5;
             DeQueue(&pth->tasks);//拿到后就弹出该元素
             pthread_cleanup_pop(1);//这个必须和pthread_cleanup_push成对出现，因为内部是个{}，否则会出现错误
             printf("I am Work ,tid = %lu\n",pthread_self());
-            transFile(netFd,cmd,name,md5);
+            transFile(socFd,cmd,name,md5);
             printf("done\n");
-            close(netFd);
+            close(socFd);
         }
 
     }

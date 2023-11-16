@@ -74,12 +74,13 @@ int UsrMoveData(char *usra,char *cmd,char *opr)
     
 }
 
+//从服务端数据库取出salt
 int checkAddress(char *usrA,char *salt)
 {
     MYSQL *conn;
     MYSQL_RES *res;
     MYSQL_ROW row;
-    char query[300]="select * from usrAdr;" ;
+    char query[300]="select * from serveruser;" ;
     int ret = mySqlInit(&conn,query);
     if(!ret)
     {
@@ -89,6 +90,7 @@ int checkAddress(char *usrA,char *salt)
             while((row=mysql_fetch_row(res))!=NULL)
             {	
                 //printf("num=%d\n",mysql_num_fields(res));//列数
+                //id | username | salt | cryptPwd | curPwd
                 if(strcmp(row[1],usrA)==0)//匹配用户名成功,则取盐值  
                 {
                     strcpy(salt,row[2]);
@@ -111,14 +113,14 @@ int checkAddress(char *usrA,char *salt)
         return -1;
 }
 
-//匹配密码
+//匹配密码密文
 int checkPwd(char *usrA,char *pwd)
 {
     MYSQL *conn;
     MYSQL_RES *res;
     MYSQL_ROW row;
     char query[300]={0};
-    sprintf(query,"select * from usrAdr where Usrname='%s';",usrA);
+    sprintf(query,"select * from serveruser where usrname='%s';",usrA);
     int ret = mySqlInit(&conn,query);
     if(!ret)
     {

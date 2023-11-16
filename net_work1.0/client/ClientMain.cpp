@@ -24,6 +24,7 @@ int main(int argc, char *argv[])
     ARGS_CHECK(argc, 3);
     // 先连接 客户端 socket connect
     int socFd, ret;
+    int putsSocFd,getsSocFd;
     ERROR_CHECK(socFd, -1, "socket");
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
@@ -45,24 +46,56 @@ login_begin:
     system("clear");
     menuShow();
     int cmd = 0;
-
+    string usrname;
+    string userpwd1,userpwd2;
     scanf("%d", &cmd);
     if (cmd == 1)
     {
         // 登录
+        // string userpwd1;
+        cout << "username:";
+        // string username;
+        cin >> usrname;
+rePwd:
+        userpwd1 = getpass("userpwd:");
+        //连接
+        socFd = socket(AF_INET, SOCK_STREAM, 0);
+        ret = connect(socFd, (struct sockaddr *)&addr, sizeof(addr));
+        ERROR_CHECK(ret, -1, "connect");
+            // 传递用户名
+        train_t.len = usrname.size();
+        strcpy(train_t.buf, usrname.c_str());
+        send(socFd, &train_t, sizeof(train_t.len) + train_t.len, 0);
+        // 传递密码用带有状态的火车协议，对方收三次
+        trainState tStat;
+        tStat.state = LOGIN;
+        tStat.data_len = userpwd1.size();
+        strcpy(tStat.buf, userpwd1.c_str());
+        send(socFd, &tStat, sizeof(tStat.data_len) + tStat.data_len + sizeof(tStat.state), 0);
+        char retVal[128]={0};
+        recvn(socFd,retVal,sizeof(retVal));
+        if(strcmp("1",retVal)==0)
+        {
+            cout<<"登陆成功"<<endl;
+        }else{
+            cout<<"密码错误,请重新输入"<<endl;
+            bzero(&userpwd1[0],userpwd1.size());
+            goto  rePwd;
+        }
+        
+
     }
     else if (cmd == 2)
     {
         // 注册
         cout << "根据提示完成注册" << endl;
-        char username[128] = {0};
+        // char username[128] = {0};
 recin:
-        // char *userpwd1;
-        // char *userpwd2;//baocun
-        string userpwd1;
-        string userpwd2;
+        
+        // string userpwd1;
+        // string userpwd2;
         cout << "username:";
-        cin >> username;
+        cin >> usrname;
         // for (auto ch : usrName)
         // {
         //     if (strcmp(ch, username))
@@ -73,9 +106,7 @@ recin:
         //         goto recin;
         //     }
         // }
-        /******************************/
         userpwd1 = getpass("userpwd:");
-        // strncpy(userpwd2,userpwd1,sizeof(userpwd2)-1);
         userpwd2=userpwd1;
         cout<<userpwd2<<endl;
         bzero(&userpwd1[0],userpwd1.size());
@@ -88,26 +119,25 @@ recin:
             // 注册失败
             printf("注册失败\n");
             printf("两次输入不一致，即将回到主界面\n");
+            bzero(&usrname[0],usrname.size());
+            bzero(&userpwd1[0],userpwd1.size());
+            bzero(&userpwd2[0],userpwd2.size());
             sleep(2);
             goto login_begin;
         }
         else
         {
-            // cout<<ret<<endl;
             // 注册成功
-            // user usr;
-            // strcpy(usr.name, username);
-            // strcpy(usr.pwd, userpwd1);
-            // UserInfo.push_back(usr); // 存进数组中
             cout<<"注册成功"<<endl;
             // usrName.push_back(username);//进行查重 想法应该错了，这个一次性，应该数据库
-            UsrAcepdata(username);
+            char*name=(char*)usrname.c_str();
+            UsrAcepdata(name);
             socFd = socket(AF_INET, SOCK_STREAM, 0);
             ret = connect(socFd, (struct sockaddr *)&addr, sizeof(addr));
             ERROR_CHECK(ret, -1, "connect");
             // 传递用户名
-            train_t.len = strlen(username) + 1;
-            strcpy(train_t.buf, username);
+            train_t.len = usrname.size();
+            strcpy(train_t.buf, usrname.c_str());
             send(socFd, &train_t, sizeof(train_t.len) + train_t.len, 0);
             // 传递密码用带有状态的火车协议，对方收三次
             trainState tStat;
@@ -122,7 +152,7 @@ recin:
             recvn(socFd, token, lenth);
             // 存储token
             string stoken(token); // 转化为string类型
-            usrToken[username] = stoken;
+            usrToken[usrname] = stoken;
         }
     }
     else if (cmd == 3)
@@ -148,6 +178,7 @@ recin:
     }
     //把socfd加入监听
     epollAdd(socFd, epfd);
+    char BUF[1024]={0};
     while (1)
     {
         int readNum = epoll_wait(epfd, readArr, 3, -1);
@@ -203,18 +234,26 @@ recin:
                 {
                     // 子线程
                     // doGets();
-                    // pthread_create();
-                     //先accept
-                    int netFd=accept(socFd,NULL,NULL);
+                    //先socFd
+                    getsSocFd=socket(AF_INET, SOCK_STREAM, 0);
+                    ret = connect(getsSocFd, (struct sockaddr *)&addr, sizeof(addr));
+                    ERROR_CHECK(ret, -1, "connect");
+                    // 传递token用带有状态的火车协议，对方收三次
+                    string token=usrToken[usrname];
+                    trainState tStat;
+                    tStat.state = GETS;
+                    tStat.data_len =token.size();
+                    strcpy(tStat.buf, userpwd1.c_str());
+                    send(getsSocFd, &tStat, sizeof(tStat.data_len) + tStat.data_len + sizeof(tStat.state), 0);
+                    epollAdd(getsSocFd,epfd);
                     string name = buf+5;
                     string md5=0;
                     //再加锁
                     pthread_mutex_lock(&pThread.tasks.mutex);
-                    //把netFd cmd name入队
-                    cmd_t cmd={netFd,"gets",name,md5};
+                    //把getsSocFd cmd name入队
+                    cmd_t cmd={getsSocFd,"gets",name,md5};
                     EnQueue(&pThread.tasks,cmd);
                     printf("new Task\n");
-                    // pThread.cmd="gets";
                     //通知
                     pthread_cond_signal(&pThread.tasks.cond);
                     //解锁
@@ -224,7 +263,16 @@ recin:
                 {
                     // 子线程
                     // doPuts();
-                    int netFd=accept(socFd,NULL,NULL);
+                    putsSocFd=socket(AF_INET, SOCK_STREAM, 0);
+                     // 传递token用带有状态的火车协议，对方收三次
+                    string token=usrToken[usrname];
+                    trainState tStat;
+                    tStat.state = PUTS;
+                    tStat.data_len =token.size();
+                    strcpy(tStat.buf, userpwd1.c_str());
+                    send(putsSocFd, &tStat, sizeof(tStat.data_len) + tStat.data_len + sizeof(tStat.state), 0);
+                    epollAdd(putsSocFd,epfd);
+                    // int netFd=accept(socFd,NULL,NULL);
                     string name = buf+5;//tiqumingzi
                     const char*path=name.c_str();
                     //MD5
@@ -239,7 +287,7 @@ recin:
                      //再加锁
                     pthread_mutex_lock(&pThread.tasks.mutex);
                     //把netFd cmd name入队
-                    cmd_t cmd={netFd,"puts",name,md5};
+                    cmd_t cmd={putsSocFd,"puts",name,md5};
                     EnQueue(&pThread.tasks,cmd);
                     printf("new Task\n");
                     // pThread.cmd="gets";
@@ -252,7 +300,18 @@ recin:
             }
             if (readArr[i].data.fd == socFd)
             {
-                // 接收信息
+                // 接收信息 ls的内容 cd 的内容 
+                ret = recv(socFd,BUF,sizeof(BUF),0);
+                ERROR_CHECK(ret,-1,"recvDuan");
+                puts(BUF);
+            }
+            if(readArr[i].data.fd == getsSocFd)
+            {
+                //下载成功
+            }
+             if(readArr[i].data.fd == putsSocFd)
+            {
+                //上传成功
             }
         }
     }

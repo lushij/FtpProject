@@ -81,9 +81,9 @@ int doPuts()
     
 }
 
-int transFile(int netFd, string cmd,string name,string md5)
+int transFile(int socFd, string cmd,string name,string md5)
 {
-    if(cmd == "gets"){//xiazai
+    if(cmd == "gets"){//下载
         const char*path=name.c_str();//zhuanhau
         int fd = open(path,O_RDWR);
      //打开文件
@@ -91,7 +91,7 @@ int transFile(int netFd, string cmd,string name,string md5)
         train_s train;
         train.len=4;
         strcpy(train.buf,"file");
-        int ret = send(netFd,&train,sizeof(train.len)+train.len,MSG_NOSIGNAL);//注意：要把整个小火车都传过去
+        int ret = send(socFd,&train,sizeof(train.len)+train.len,MSG_NOSIGNAL);//注意：要把整个小火车都传过去
         ERROR_CHECK(ret,-1,"send");
 
         struct stat st;
@@ -102,7 +102,7 @@ int transFile(int netFd, string cmd,string name,string md5)
         train.len=4;
         //这样就要进行传送二进制文件了
         memcpy(train.buf,&fileSize,sizeof(int));
-        ret = send(netFd,&train,sizeof(train.len)+train.len,MSG_NOSIGNAL);//注意：要把整个小火车都传过去
+        ret = send(socFd,&train,sizeof(train.len)+train.len,MSG_NOSIGNAL);//注意：要把整个小火车都传过去
         ERROR_CHECK(ret,-1,"send");
         while(1)//xianduwenjian
         {
@@ -112,14 +112,14 @@ int transFile(int netFd, string cmd,string name,string md5)
                 break;
             }
             train.len=ret;
-            send(netFd,&train,sizeof(train.len)+train.len,MSG_NOSIGNAL);
+            send(socFd,&train,sizeof(train.len)+train.len,MSG_NOSIGNAL);
         }
         train.len=0;//最后发个0表示发完了，接收方可以根据长度为0进行退出接收
-        send(netFd,&train,sizeof(train.len)+train.len,MSG_NOSIGNAL);
+        send(socFd,&train,sizeof(train.len)+train.len,MSG_NOSIGNAL);
         close(fd);
 
 
-    }else{//shnagchuan
+    }else{//上传
         //jiinxingshujukuduibile
         //chaxunshujukude md5shifouyiyang
 
