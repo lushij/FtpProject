@@ -1,8 +1,8 @@
 #include "head.h"
-#include "md5.h"
+// #include "md5.h"
 #include "Function.h"
-#include "thRead.h"
-
+// #include "thRead.h"
+#include"MysqlFunc.h"
 // unordered_map<string,string>usrToken;//存放usrname和token
 /***********************************/
 // 设置md5的文件相关路径
@@ -57,32 +57,32 @@ login_begin:
         cout << "根据提示完成注册" << endl;
         char username[128] = {0};
 recin:
-        char *userpwd1;
-        char *userpwd2;//baocun
+        // char *userpwd1;
+        // char *userpwd2;//baocun
+        string userpwd1;
+        string userpwd2;
         cout << "username:";
         cin >> username;
-        for (auto ch : usrName)
-        {
-            if (strcmp(ch, username))
-            {
-                cout << "该用户已存在,请重新输入" << endl;
-                bzero(username, sizeof(username));
-                system("clear");
-                goto recin;
-            }
-        }
+        // for (auto ch : usrName)
+        // {
+        //     if (strcmp(ch, username))
+        //     {
+        //         cout << "该用户已存在,请重新输入" << endl;
+        //         bzero(username, sizeof(username));
+        //         system("clear");
+        //         goto recin;
+        //     }
+        // }
         /******************************/
         userpwd1 = getpass("userpwd:");
-        cout<<userpwd1<<endl;
-        strcpy(userpwd2,userpwd1);
-        bzero(userpwd1,sizeof(userpwd1));
+        // strncpy(userpwd2,userpwd1,sizeof(userpwd2)-1);
+        userpwd2=userpwd1;
+        cout<<userpwd2<<endl;
+        bzero(&userpwd1[0],userpwd1.size());
         userpwd1 = getpass("Please re-enter your userpwd:");
         cout<<userpwd1<<endl;
-        string upwd1(userpwd1);
-        string upwd2(userpwd2);
-        cout<<upwd2<<" "<<upwd1<<endl;
         /*********************************/
-        if (upwd1!=upwd2)
+        if (userpwd1!=userpwd2)
         {
             // cout<<ret<<endl;
             // 注册失败
@@ -101,6 +101,7 @@ recin:
             // UserInfo.push_back(usr); // 存进数组中
             cout<<"注册成功"<<endl;
             // usrName.push_back(username);//进行查重 想法应该错了，这个一次性，应该数据库
+            UsrAcepdata(username);
             socFd = socket(AF_INET, SOCK_STREAM, 0);
             ret = connect(socFd, (struct sockaddr *)&addr, sizeof(addr));
             ERROR_CHECK(ret, -1, "connect");
@@ -111,8 +112,8 @@ recin:
             // 传递密码用带有状态的火车协议，对方收三次
             trainState tStat;
             tStat.state = REGISTER;
-            tStat.data_len = strlen(userpwd1) + 1;
-            strcpy(tStat.buf, userpwd1);
+            tStat.data_len = userpwd1.size();
+            strcpy(tStat.buf, userpwd1.c_str());
             send(socFd, &tStat, sizeof(tStat.data_len) + tStat.data_len + sizeof(tStat.state), 0);
             // 接收token
             int lenth;
@@ -145,6 +146,7 @@ recin:
         // 退出
         exit(0);
     }
+    //把socfd加入监听
     epollAdd(socFd, epfd);
     while (1)
     {

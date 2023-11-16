@@ -1,3 +1,4 @@
+#pragma once
 #include"head.h"
 typedef struct cmd_s{
     int netFd;

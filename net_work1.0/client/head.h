@@ -32,6 +32,8 @@
 #include <sys/sendfile.h>
 #include <pthread.h>
 #include<string.h>
+#include<stdlib.h>
+#include<cstring>
 #include<iostream>
 #include<vector>
 #include<unordered_map>
