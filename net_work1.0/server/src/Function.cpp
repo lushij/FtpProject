@@ -1,64 +1,62 @@
-
-#include"Function.h"
-
-int epollAdd(int fd,int epfd)
+#include "Function.h"
+#define STR_LEN 8
+char str[STR_LEN + 1] = {0};
+int epollAdd(int fd, int epfd)
 {
     struct epoll_event evs;
-    evs.data.fd=fd;
-    evs.events=EPOLLIN;
-    int ret = epoll_ctl(epfd,EPOLL_CTL_ADD,fd,&evs);
-    ERROR_CHECK(ret,-1,"epoll_ctl");
+    evs.data.fd = fd;
+    evs.events = EPOLLIN;
+    int ret = epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &evs);
+    ERROR_CHECK(ret, -1, "epoll_ctl");
 }
 
-int epollDel(int fd,int epfd)
+int epollDel(int fd, int epfd)
 {
     struct epoll_event evs;
-    evs.data.fd=fd;
-    evs.events=EPOLLIN;
-    int ret = epoll_ctl(epfd,EPOLL_CTL_DEL,fd,&evs);
-    ERROR_CHECK(ret,-1,"epoll_ctl");
+    evs.data.fd = fd;
+    evs.events = EPOLLIN;
+    int ret = epoll_ctl(epfd, EPOLL_CTL_DEL, fd, &evs);
+    ERROR_CHECK(ret, -1, "epoll_ctl");
 }
 
-
-int recvn(int sockFd,void *pstart,int len)
+int recvn(int sockFd, void *pstart, int len)
 {
     int total = 0;
     int ret;
     char *p = (char *)pstart;
-    while(total < len){
-        ret = recv(sockFd,p+total,len-total,0);
+    while (total < len)
+    {
+        ret = recv(sockFd, p + total, len - total, 0);
         total += ret;
     }
     return 0;
 }
 
-
-//chanshengsalt
+// chanshengsalt
 char *getSalt()
 {
-    
+   
+    int i, flag;
+    srand(time(NULL));
+    for (i = 0; i < STR_LEN; i++)
+    {
+        flag = rand() % 3;
+        switch (flag)
+        {
+        case 0:
+            str[i] = rand() % 26 + 'a';
+            break;
+        case 1:
+            str[i] = rand() % 26 + 'A';
+            break;
+        case 2:
+            str[i] = rand() % 10 + '0';
+            break;
+        }
+    }
+    // printf("%s\n", str); // 输出生成的随机数。
+    return str;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 int doLs()
 {

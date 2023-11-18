@@ -265,35 +265,35 @@ int checkMd5(char*buf)
     }
 }
 
-int FindProcode(ProFile pcur,int code)
-{//返回找到的procode值
-    MYSQL *conn;
-    MYSQL_RES *res;
-    MYSQL_ROW row;
-    char query[300]={0};
-    sprintf(query,"select * from virtualFile where =%d and belongID='%s';",code,pcur->next);
-    int ret = mySqlInit(&conn,query);
-    if(!ret)
-    {
-        res=mysql_use_result(conn);
-        if(res)
-        {
-            row=mysql_fetch_row(res);
-            int len = strlen(row[0]);
-            int b = row[0][0]-48;
-            for(int i = 1;i<len;i++)
-            {
-                b = b*10+row[0][i]-48;
-            }
-            mysql_free_result(res);
-            mysql_close(conn);
-            return b;
-        }
-    }
-    mysql_free_result(res);
-    mysql_close(conn);
-    return -1;
-}
+// int FindProcode(ProFile pcur,int code)
+// {//返回找到的procode值
+//     MYSQL *conn;
+//     MYSQL_RES *res;
+//     MYSQL_ROW row;
+//     char query[300]={0};
+//     sprintf(query,"select * from virtualFile where =%d and belongID='%s';",code,pcur->next);
+//     int ret = mySqlInit(&conn,query);
+//     if(!ret)
+//     {
+//         res=mysql_use_result(conn);
+//         if(res)
+//         {
+//             row=mysql_fetch_row(res);
+//             int len = strlen(row[0]);
+//             int b = row[0][0]-48;
+//             for(int i = 1;i<len;i++)
+//             {
+//                 b = b*10+row[0][i]-48;
+//             }
+//             mysql_free_result(res);
+//             mysql_close(conn);
+//             return b;
+//         }
+//     }
+//     mysql_free_result(res);
+//     mysql_close(conn);
+//     return -1;
+// }
 // //传入precode来列出对应目录下的所有文件
 // int LS_func(pfilename fnames,int cdvalue,pNode_t pcur) 
 // {//循环发送procode目录下的文件名

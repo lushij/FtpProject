@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) //.server ../conf/server.conf
                 recvn(netFd,buf,len);
                 if(stat==CHECKNAME)
                 {
-                    //shujuku
+                    //数据库
                     int res = checkName (buf);
                     if(res == -1){
                         send(netFd,&res,sizeof(int),0);//biaoshigaimingzikeyong
@@ -78,16 +78,19 @@ int main(int argc, char *argv[]) //.server ../conf/server.conf
                         recvn(netFd,buf,len);
                         if(stat == REGISTER)
                         {
-                            //zhuce
-                            //chansheng salt
-                            char *salt=getSalt();
-                            //sehngcehng miwen
+                            //注册
+
+                            //创建 salt
+                            char *randStr=getSalt();
+                            char salt[128]={0};
+                            sprintf(salt,"$6$%s$",randStr);
+                            //生成密文
                             char *cryptPwd=crypt(buf,salt);
-                            //cunru shujuku
+                            //存储到数据库
                             saveServerInfo(usrname,salt,cryptPwd,0);
                             //cunru shujuku wenjianbiao
                             // dataInsert(0,NULL,);
-                            //shengchegg   token baocunshujuku biingfasoagkehuduan
+                            //生成token   token baocunshujuku biingfasoagkehuduan
                         }
                     }
                     else

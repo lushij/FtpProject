@@ -1,6 +1,7 @@
 #pragma once
 #ifndef __HEAD_H__
 #define __HEAD_H__
+#include <crypt.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
