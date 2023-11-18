@@ -1,4 +1,6 @@
+
 #include"Function.h"
+
 int epollAdd(int fd,int epfd)
 {
     struct epoll_event evs;
@@ -17,27 +19,7 @@ int epollDel(int fd,int epfd)
     ERROR_CHECK(ret,-1,"epoll_ctl");
 }
 
-void menuShow()
-{
-    printf("******************\n");
-    printf("******1.登录******\n");
-    printf("******2.注册******\n");
-    printf("******3.功能******\n");
-    printf("******0.退出******\n");
-    printf("******************\n");
-}
 
-
-int Login()
-{
-    char username[128]={0};
-    char userpwd[128]={0};
-    cout<<"userName:";
-    cin>>username;
-    cout<<"userPwd:";
-    cin>>userpwd;
-    
-}
 int recvn(int sockFd,void *pstart,int len)
 {
     int total = 0;
@@ -49,6 +31,33 @@ int recvn(int sockFd,void *pstart,int len)
     }
     return 0;
 }
+
+
+//chanshengsalt
+char *getSalt()
+{
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 int doLs()
@@ -124,36 +133,4 @@ int transFile(int socFd, string cmd,string name,string md5)
         //chaxunshujukude md5shifouyiyang
 
     }
-}
-
-
-int recvFile(int sockFd){
-    // //先获取文件名
-    // char name[1024] = {0};
-    int dataLength;
-    // int ret = recvn(sockFd,&dataLength,sizeof(int));
-    // ERROR_CHECK(ret,-1,"recv");
-    // ret = recvn(sockFd,name,dataLength);
-    // ERROR_CHECK(ret,-1,"recv");
-    // int fd = open(name,O_RDWR|O_CREAT|O_TRUNC,0666);
-    // ERROR_CHECK(fd,-1,"open");
-    int fileSize;
-    recvn(sockFd,&dataLength,sizeof(int));
-    recvn(sockFd,&fileSize,dataLength);
-    printf("fileSize = %d\n", fileSize);
-    char buf[1000] = {0};
-    time_t timeBeg,timeEnd;
-    timeBeg = time(NULL);
-    int pipefds[2];
-    pipe(pipefds);
-    int total = 0;
-    while(total < fileSize){
-        int ret = splice(sockFd,NULL,pipefds[1],NULL,4096,SPLICE_F_MORE);
-        total += ret;
-        // splice(pipefds[0],NULL,fd,NULL,ret,SPLICE_F_MORE);
-    }
-    recvn(sockFd,&dataLength,sizeof(int));
-    printf("dataLength = %d\n", dataLength);
-    timeEnd = time(NULL);
-    printf("total time = %ld\n", timeEnd - timeBeg);
 }

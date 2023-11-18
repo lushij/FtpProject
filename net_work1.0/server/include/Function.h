@@ -1,8 +1,7 @@
 #pragma once
 #include"head.h"
 
-enum 
-{
+enum {
     REGISTER,
     LOGIN,
     CHECKNAME,
@@ -46,10 +45,9 @@ int doPwd();
 int doRm();
 int doMkdir();
 
+int tcpInit(int *socFd,char*ip,char*port);
+int ObtainIpAndPort(char *path, char *ip, char *port);
+static void ftp_arg_set(char *buf, char *arg);
 int doGets();
 int doPuts();
 int transFile(int netFd, string cmd,string name,string md5);
-int recvFile(int sockFd);
-
-
-

@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     // 先连接 客户端 socket connect
     int socFd, ret;
     int putsSocFd,getsSocFd;
-    ERROR_CHECK(socFd, -1, "socket");
+    
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
     addr.sin_port = htons(atoi(argv[2]));
@@ -51,37 +51,42 @@ login_begin:
     scanf("%d", &cmd);
     if (cmd == 1)
     {
+   
         // 登录
         // string userpwd1;
         cout << "username:";
         // string username;
         cin >> usrname;
-rePwd:
-        userpwd1 = getpass("userpwd:");
-        //连接
-        socFd = socket(AF_INET, SOCK_STREAM, 0);
-        ret = connect(socFd, (struct sockaddr *)&addr, sizeof(addr));
-        ERROR_CHECK(ret, -1, "connect");
-            // 传递用户名
-        train_t.len = usrname.size();
-        strcpy(train_t.buf, usrname.c_str());
-        send(socFd, &train_t, sizeof(train_t.len) + train_t.len, 0);
-        // 传递密码用带有状态的火车协议，对方收三次
-        trainState tStat;
-        tStat.state = LOGIN;
-        tStat.data_len = userpwd1.size();
-        strcpy(tStat.buf, userpwd1.c_str());
-        send(socFd, &tStat, sizeof(tStat.data_len) + tStat.data_len + sizeof(tStat.state), 0);
-        char retVal[128]={0};
-        recvn(socFd,retVal,sizeof(retVal));
-        if(strcmp("1",retVal)==0)
-        {
-            cout<<"登陆成功"<<endl;
-        }else{
-            cout<<"密码错误,请重新输入"<<endl;
-            bzero(&userpwd1[0],userpwd1.size());
-            goto  rePwd;
-        }
+         
+    rePwd:
+            userpwd1 = getpass("userpwd:");
+            //连接
+            // 传递密码用带有状态的火车协议，对方收三次
+            socFd = socket(AF_INET, SOCK_STREAM, 0);
+            ret = connect(socFd, (struct sockaddr *)&addr, sizeof(addr));
+            ERROR_CHECK(ret, -1, "connect");
+            //xianfasongmima
+            trainState tStat;
+            tStat.state = LOGIN;
+            tStat.data_len = userpwd1.size();
+            strcpy(tStat.buf, userpwd1.c_str());
+            send(socFd, &tStat, sizeof(tStat.data_len) + tStat.data_len + sizeof(tStat.state), 0);
+            //fasong wenjianm
+            train_t.len=usrname.size();
+            strcpy(train_t.buf,usrname.c_str());
+            send(socFd, &train_t, sizeof(train_t.len) + tStat.data_len , 0);
+            int res;
+            recvn(socFd,&res,sizeof(int));
+            if(res == 0)
+            {
+                cout<<"登陆成功"<<endl;
+            }else{
+                cout<<"密码错误,请重新输入"<<endl;
+                bzero(&userpwd1[0],userpwd1.size());
+                goto  rePwd;
+            }
+       
+
         
 
     }
@@ -89,71 +94,79 @@ rePwd:
     {
         // 注册
         cout << "根据提示完成注册" << endl;
-        // char username[128] = {0};
-recin:
-        
-        // string userpwd1;
-        // string userpwd2;
+reName:
         cout << "username:";
         cin >> usrname;
-        // for (auto ch : usrName)
-        // {
-        //     if (strcmp(ch, username))
-        //     {
-        //         cout << "该用户已存在,请重新输入" << endl;
-        //         bzero(username, sizeof(username));
-        //         system("clear");
-        //         goto recin;
-        //     }
-        // }
-        userpwd1 = getpass("userpwd:");
-        userpwd2=userpwd1;
-        cout<<userpwd2<<endl;
-        bzero(&userpwd1[0],userpwd1.size());
-        userpwd1 = getpass("Please re-enter your userpwd:");
-        cout<<userpwd1<<endl;
-        /*********************************/
-        if (userpwd1!=userpwd2)
+        //conghsujuku chaxun youchongfumingzi
+        // 传递用户名 jinxingcahchng
+        socFd = socket(AF_INET, SOCK_STREAM, 0);
+        ret = connect(socFd, (struct sockaddr *)&addr, sizeof(addr));
+        ERROR_CHECK(ret, -1, "connect");
+        trainState tStat;
+        tStat.state = CHECKNAME;
+        tStat.data_len = usrname.size();
+        strcpy(tStat.buf, usrname.c_str());
+        send(socFd, &tStat, sizeof(tStat.data_len) + tStat.data_len + sizeof(tStat.state), 0);
+        char retVal[128]={0};
+        int res;
+        recvn(socFd,&res,sizeof(int));
+         //-1 daibiao buchongfu
+        if(res == -1)
         {
-            // cout<<ret<<endl;
-            // 注册失败
-            printf("注册失败\n");
-            printf("两次输入不一致，即将回到主界面\n");
-            bzero(&usrname[0],usrname.size());
+            userpwd1 = getpass("userpwd:");
+            userpwd2=userpwd1;
+            cout<<userpwd2<<endl;
             bzero(&userpwd1[0],userpwd1.size());
-            bzero(&userpwd2[0],userpwd2.size());
-            sleep(2);
-            goto login_begin;
+            userpwd1 = getpass("Please re-enter your userpwd:");
+            cout<<userpwd1<<endl;
+            /*********************************/
+            if (userpwd1!=userpwd2)
+            {
+                // cout<<ret<<endl;
+                // 注册失败
+                printf("注册失败\n");
+                printf("两次输入不一致，即将回到主界面\n");
+                bzero(&usrname[0],usrname.size());
+                bzero(&userpwd1[0],userpwd1.size());
+                bzero(&userpwd2[0],userpwd2.size());
+                sleep(2);
+                goto login_begin;
+            }
+            else
+            {
+                // 注册成功
+                cout<<"注册成功"<<endl;
+                // usrName.push_back(username);//进行查重 想法应该错了，这个一次性，应该数据库
+                // char*name=(char*)usrname.c_str();
+                // UsrAcepdata(name);
+                // // 传递用户名
+                // train_t.len = usrname.size();
+                // strcpy(train_t.buf, usrname.c_str());
+                // send(socFd, &train_t, sizeof(train_t.len) + train_t.len, 0);
+                // 传递密码用带有状态的火车协议，对方收三次
+                trainState tStat;
+                tStat.state = REGISTER;
+                tStat.data_len = userpwd1.size();
+                strcpy(tStat.buf, userpwd1.c_str());
+                send(socFd, &tStat, sizeof(tStat.data_len) + tStat.data_len + sizeof(tStat.state), 0);
+                // 接收token
+                int lenth;
+                char token[128] = {0};
+                recvn(socFd, &lenth, sizeof(int));
+                recvn(socFd, token, lenth);
+                // 存储token
+                string stoken(token); // 转化为string类型
+                usrToken[usrname] = stoken;
+            }
         }
         else
         {
-            // 注册成功
-            cout<<"注册成功"<<endl;
-            // usrName.push_back(username);//进行查重 想法应该错了，这个一次性，应该数据库
-            char*name=(char*)usrname.c_str();
-            UsrAcepdata(name);
-            socFd = socket(AF_INET, SOCK_STREAM, 0);
-            ret = connect(socFd, (struct sockaddr *)&addr, sizeof(addr));
-            ERROR_CHECK(ret, -1, "connect");
-            // 传递用户名
-            train_t.len = usrname.size();
-            strcpy(train_t.buf, usrname.c_str());
-            send(socFd, &train_t, sizeof(train_t.len) + train_t.len, 0);
-            // 传递密码用带有状态的火车协议，对方收三次
-            trainState tStat;
-            tStat.state = REGISTER;
-            tStat.data_len = userpwd1.size();
-            strcpy(tStat.buf, userpwd1.c_str());
-            send(socFd, &tStat, sizeof(tStat.data_len) + tStat.data_len + sizeof(tStat.state), 0);
-            // 接收token
-            int lenth;
-            char token[128] = {0};
-            recvn(socFd, &lenth, sizeof(int));
-            recvn(socFd, token, lenth);
-            // 存储token
-            string stoken(token); // 转化为string类型
-            usrToken[usrname] = stoken;
+            printf("name is exit\n");
+            sleep(1);
+            system("clear");
+            goto reName;
         }
+        
     }
     else if (cmd == 3)
     {
@@ -194,25 +207,36 @@ recin:
                 {
                     // doLs();
                     bzero(&train_t,sizeof(train_t));
-                    train_t.len=2;
-                    strcpy(train_t.buf,"ls");
-                    send(socFd,&train_t,sizeof(train_t),0);
+                    string cmd(buf+3);
+                    trainState tStat;
+                    tStat.data_len=cmd.size();
+                    tStat.state=LS;
+                    strcpy(tStat.buf,cmd.c_str());
+                    send(socFd,&tStat,sizeof(tStat.data_len)+tStat.data_len+sizeof(tStat.state),0);
+
                 }
                 if (strncmp(buf, "cd", 2) == 0)
                 {
                     // doCd();
                     bzero(&train_t,sizeof(train_t));
-                    train_t.len=2;
-                    strcpy(train_t.buf,"cd");
-                    send(socFd,&train_t,sizeof(train_t),0);
+                    string cmd(buf+3);
+                    trainState tStat;
+                    tStat.data_len=cmd.size();
+                    tStat.state=CD;
+                    strcpy(tStat.buf,cmd.c_str());
+                    send(socFd,&tStat,sizeof(tStat.data_len)+tStat.data_len+sizeof(tStat.state),0);
                 }
                 if (strncmp(buf, "pwd", 3) == 0)
                 {
                     // doPwd();
                     bzero(&train_t,sizeof(train_t));
-                    train_t.len=3;
-                    strcpy(train_t.buf,"pwd");
-                    send(socFd,&train_t,sizeof(train_t),0);
+                    bzero(&train_t,sizeof(train_t));
+                    string cmd(buf+3);
+                    trainState tStat;
+                    tStat.data_len=cmd.size();
+                    tStat.state=PWD;
+                    strcpy(tStat.buf,cmd.c_str());
+                    send(socFd,&tStat,sizeof(tStat.data_len)+tStat.data_len+sizeof(tStat.state),0);
                 }
                 if (strncmp(buf, "rm", 2) == 0)
                 {
@@ -300,10 +324,22 @@ recin:
             }
             if (readArr[i].data.fd == socFd)
             {
-                // 接收信息 ls的内容 cd 的内容 
-                ret = recv(socFd,BUF,sizeof(BUF),0);
-                ERROR_CHECK(ret,-1,"recvDuan");
-                puts(BUF);
+                // 接收信息 ls deng的内容 cd 的内容 
+                while (1)
+                {
+                    
+                    int length;
+                    ret = recvn(socFd,&length,sizeof(int));
+                    ret = recvn(socFd,BUF,length);
+                    ERROR_CHECK(ret,-1,"recvDuan");
+                    puts(BUF);
+                    if(length == 0)
+                    {
+                        break;
+                    }
+                }
+                
+               
             }
             if(readArr[i].data.fd == getsSocFd)
             {
@@ -312,6 +348,12 @@ recin:
              if(readArr[i].data.fd == putsSocFd)
             {
                 //上传成功
+                int rest;
+                recvn(socFd,&rest,sizeof(int));
+                if(rest == 0)
+                {
+                    puts("puts successful");
+                }
             }
         }
     }

@@ -1,4 +1,4 @@
-#include"work.h"
+#include"Function.h"
 
 static void ftp_arg_set(char *buf, char *arg)
 {
