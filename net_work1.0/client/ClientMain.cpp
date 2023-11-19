@@ -65,13 +65,13 @@ login_begin:
             socFd = socket(AF_INET, SOCK_STREAM, 0);
             ret = connect(socFd, (struct sockaddr *)&addr, sizeof(addr));
             ERROR_CHECK(ret, -1, "connect");
-            //xianfasongmima
+            //先发送密码
             trainState tStat;
             tStat.state = LOGIN;
             tStat.data_len = userpwd1.size();
             strcpy(tStat.buf, userpwd1.c_str());
             send(socFd, &tStat, sizeof(tStat.data_len) + tStat.data_len + sizeof(tStat.state), 0);
-            //fasong wenjianm
+            //发送name
             train_t.len=usrname.size();
             strcpy(train_t.buf,usrname.c_str());
             send(socFd, &train_t, sizeof(train_t.len) + tStat.data_len , 0);

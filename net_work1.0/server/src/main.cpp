@@ -68,12 +68,12 @@ int main(int argc, char *argv[]) //.server ../conf/server.conf
                     //数据库
                     int res = checkName (buf);
                     if(res == -1){
-                        send(netFd,&res,sizeof(int),0);//biaoshigaimingzikeyong
+                        send(netFd,&res,sizeof(int),0);//表示名字可用
                         char usrname[1024]={0};
-                        strcpy(usrname,buf);//cunchu name;
+                        strcpy(usrname,buf);//存储 name;
                         bzero(buf,sizeof(buf));
                         len = 0;
-                        recvn(netFd,&len,sizeof(int));//xiainhuoqu
+                        recvn(netFd,&len,sizeof(int));//先获取长度
                         recvn(netFd,&stat,sizeof(int));
                         recvn(netFd,buf,len);
                         if(stat == REGISTER)
@@ -88,9 +88,20 @@ int main(int argc, char *argv[]) //.server ../conf/server.conf
                             char *cryptPwd=crypt(buf,salt);
                             //存储到数据库
                             saveServerInfo(usrname,salt,cryptPwd,0);
-                            //cunru shujuku wenjianbiao
+                            //存入数据库文件表
                             // dataInsert(0,NULL,);
-                            //生成token   token baocunshujuku biingfasoagkehuduan
+                            //生成token   token 存入数据库并发送客户端
+                            char *tokStr=getSalt();
+                            char token[128]={0};
+                            sprintf(token,"$token$%s$%s",usrname,tokStr);
+                            //存入数据库
+                            saveServerToken(usrname,token);
+                            //发送token
+                            Train stat_t;
+                            stat_t.len=strlen(token)+1;
+                            strcpy(stat_t.buf,token);
+                            send(netFd,&stat_t,sizeof(stat_t.len)+stat_t.len,0);
+
                         }
                     }
                     else
@@ -112,16 +123,15 @@ int main(int argc, char *argv[]) //.server ../conf/server.conf
                     char *salt;
                     checkAddress(buf,salt);
                     char*crypwd=crypt(pwd,salt);
-                    //duibi shujuku
-                    int ret = checkPwd(buf,crypwd); // 0 biaoshi chenggoong
+                    //对比数据库
+                    int ret = checkPwd(buf,crypwd); // 0 表示 成功
                     send(netFd,&ret,sizeof(int),0);
-
 
                 }
                 
                 if(stat == LS)
                 {
-                    //zhijieshujukucaozuo
+                    //直接数据库操作
 
                 }
                 if(stat == CD)
@@ -149,17 +159,17 @@ int main(int argc, char *argv[]) //.server ../conf/server.conf
                 }
                 if(stat == PUTS)
                 {
-                    //shangcahun
-                    //cishi buf nei cunru de shi md5
+                    //上传
+                    //此时 buf 内存的是 md5
                     //jinxing chashi
                     int ret = checkMd5(buf);
                     if(ret == -1)
                     {
-                        //kaishishangchaun
+                        //开始上传
                     }
                     else
                     {
-                        //miaochuan
+                        //秒传
                         send(netFd,&ret,sizeof(int),0);
                     }
 

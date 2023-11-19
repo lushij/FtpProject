@@ -188,7 +188,20 @@ int saveServerInfo(char*usrname,char*salt,char*cryptPwd,int curPwd)
 
 
 
-
+int saveServerToken(char*usrname,char*token)
+{
+    MYSQL *conn;
+    char query[300]={0};
+    sprintf(query,"update serveruser  set token='%s' where username = '%s';",token,usrname);
+    int ret = mySqlInit(&conn,query); 
+    mysql_close(conn);
+    if(!ret)
+    {
+	    return 0;
+    }
+    else 
+        return -1;
+}
 
 
 

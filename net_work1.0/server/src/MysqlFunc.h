@@ -21,3 +21,4 @@ char *getSalt();
 int saveServerInfo(char*usrname,char*salt,char*cryptPwd,int curPwd);
 int dataInsert(int procode,char *fileName,char *belongID,char *filetype,char *md5Str);
 int checkMd5(char*buf);
+int saveServerToken(char*usrname,char*token);
