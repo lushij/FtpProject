@@ -28,6 +28,7 @@ int mySqlInit(MYSQL **conn,char *query)
     const char* database="Ftp1";//要访问的数据库名称
     int t;
     *conn=mysql_init(NULL);
+    // *conn=mysql_init(*conn);
     if(!mysql_real_connect(*conn,server,user,password,database,0,NULL,0))
     {
         printf("Error connecting to database:%s\n",mysql_error(*conn));

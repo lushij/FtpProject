@@ -1,6 +1,5 @@
 // #pragma once
 #include"MysqlFunc.h"
-#include"Function.h"
 //处理各种数据库操作，各种命令的处理函数，mysql数据库操作可以参考
 //MD5插入数据库
 // int Compute_file_md5(char*,char*);
@@ -34,7 +33,6 @@ int mySqlInit(MYSQL **conn,char *query)
         return -1;
     }
     t=mysql_query(*conn,query);
-    //t为0表示成功
     if(t)
     {
         printf("Error making query:%s\n",mysql_error(*conn));
@@ -134,87 +132,29 @@ int checkPwd(char *usrA,char *pwd)
             char b[200]={0};
             sprintf(a,"%s",row[3]);
             sprintf(b,"%s",pwd);
-            if(strcmp(a,b)==0)//匹配密wen成功 返回0  
+            if(strcmp(a,b)==0)//匹配密码成功 返回0  
             {
                 printf("connect success\n");
-                mysql_free_result(res);
-                mysql_close(conn);
+            mysql_free_result(res);
+            mysql_close(conn);
                 return 0;
             }
             else 
             {
                 printf("fail\n");
-                mysql_free_result(res);
-                mysql_close(conn);
+            mysql_free_result(res);
+            mysql_close(conn);
                 return -1;
             }
         }
     }
 }
 
-//查重用户名
-
-int checkName (char *name)
-{
-    MYSQL *conn;
-    MYSQL_RES *res;
-    MYSQL_ROW row;
-    char query[300]={0};
-    sprintf(query,"select * from serveruser where username='%s';",name);
-    int ret = mySqlInit(&conn,query);
-    if(!ret)
-    {
-        res=mysql_use_result(conn);
-        if(res)
-        {
-            row=mysql_fetch_row(res);
-            char a[200]={0};
-            char b[200]={0};
-            sprintf(a,"%s",row[1]);
-            sprintf(b,"%s",name);
-            if(strcmp(a,b)==0)//查重姓名成功 返回0  
-            {
-                printf("connect success\n");
-                mysql_free_result(res);
-                mysql_close(conn);
-                return 0;
-            }
-            else 
-            {
-                printf("fail\n");
-                mysql_free_result(res);
-                mysql_close(conn);
-                return -1;
-            }
-        }
-    }
-}
-
-
-int saveServerInfo(char*usrname,char*salt,char*cryptPwd,int curPwd)
+int dataInsert(int procode,char *fileName,char *belongID,char *filetype,char *md5Str)
 {
     MYSQL *conn;
     char query[300]={0};
-    sprintf(query,"insert into serveruser (username,salt,cryptPwd,curPwd) value ('%s','%s','%s','%d');",usrname,salt,cryptPwd,curPwd);
-    int ret = mySqlInit(&conn,query); 
-    mysql_close(conn);
-    if(!ret)
-    {
-        //成功
-	    return 0;
-    }
-    else 
-        return -1;
-}
-
-
-
-
-int saveServerToken(char*usrname,char*token)
-{
-    MYSQL *conn;
-    char query[300]={0};
-    sprintf(query,"update serveruser  set token='%s' where username = '%s';",token,usrname);
+    sprintf(query,"insert into filelist (procode,filename,belongID,filetype,md5sum) value ('%d','%s','%s','%s','%s');",procode,fileName,belongID,filetype,md5Str);//先插入文件表 目录表暂且不管
     int ret = mySqlInit(&conn,query); 
     mysql_close(conn);
     if(!ret)
@@ -225,41 +165,7 @@ int saveServerToken(char*usrname,char*token)
         return -1;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-int dataInsert(int parentId,char *fileName,int ownerid,char *md5,int filesize,char*type)
-{
-    MYSQL *conn;
-    char query[300]={0};
-    sprintf(query,"insert into virtualFile (parentId,fileName,ownerId,md5,fileSize,type) value ('%d','%s','%d','%s','%d','%s');",parentId,fileName,ownerid,md5,filesize,type);
-    int ret = mySqlInit(&conn,query); 
-    mysql_close(conn);
-    if(!ret)
-    {
-	    return 0;
-    }
-    else 
-        return -1;
-}
-
-// int SendFileName(,int filenum,int tran_fd)
+// int SendFileName(pfilename fnames,int filenum,int tran_fd)
 // {
 //     pfilename pot = fnames,repot;
 //     pot = fnames;
@@ -283,30 +189,13 @@ int dataInsert(int parentId,char *fileName,int ownerid,char *md5,int filesize,ch
 
 // }
 
-
-int checkMd5(char*buf)
-{
-    MYSQL *conn;
-    MYSQL_RES *res;
-    MYSQL_ROW row;
-    char query[300]={0};
-    sprintf(query,"select * from serveruser where md5='%s';",buf);
-    int ret = mySqlInit(&conn,query);
-    if(ret == -1){
-        return -1;//biaoshimeiyouzhaodao
-    }
-    else{
-        return 0;//
-    }
-}
-
-// int FindProcode(ProFile pcur,int code)
+// int FindProcode(pNode_t pcur,int code)
 // {//返回找到的procode值
 //     MYSQL *conn;
 //     MYSQL_RES *res;
 //     MYSQL_ROW row;
 //     char query[300]={0};
-//     sprintf(query,"select * from virtualFile where =%d and belongID='%s';",code,pcur->next);
+//     sprintf(query,"select * from filelist where code=%d and belongID='%s';",code,pcur->belongID);
 //     int ret = mySqlInit(&conn,query);
 //     if(!ret)
 //     {

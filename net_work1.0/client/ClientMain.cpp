@@ -1,10 +1,9 @@
 #include "head.h"
 // #include "md5.h"
 #include "Function.h"
-// #include "thRead.h"
+
 #include"MysqlFunc.h"
-// unordered_map<string,string>usrToken;//存放usrname和token
-/***********************************/
+
 // 设置md5的文件相关路径
 const char *file_path;
 char md5_str[MD5_STR_LEN + 1];
@@ -22,18 +21,14 @@ int main(int argc, char *argv[])
     unordered_map<string, string> usrToken; // 存放usrname和token
     //./client 192.168.0.158 2000
     ARGS_CHECK(argc, 3);
-    // 先连接 客户端 socket connect
+    //  客户端 socket connect
     int socFd, ret;
-    int putsSocFd,getsSocFd;
-    
+    int putsSocFd,getsSocFd; 
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
     addr.sin_port = htons(atoi(argv[2]));
     addr.sin_addr.s_addr = inet_addr(argv[1]);
-    // int ret = connect(socFd, (struct sockaddr *)&addr, sizeof(addr));
-    // ERROR_CHECK(ret, -1, "connect");
     int epfd = epoll_create(1);
-    // epollAdd(socFd, epfd);
     epollAdd(STDIN_FILENO, epfd);
     struct epoll_event readArr[3];
     char buf[1024] = {0};
@@ -97,7 +92,6 @@ login_begin:
 reName:
         cout << "username:";
         cin >> usrname;
-        //conghsujuku chaxun youchongfumingzi
         // 传递用户名 jinxingcahchng
         socFd = socket(AF_INET, SOCK_STREAM, 0);
         ret = connect(socFd, (struct sockaddr *)&addr, sizeof(addr));
@@ -110,7 +104,8 @@ reName:
         char retVal[128]={0};
         int res;
         recvn(socFd,&res,sizeof(int));
-         //-1 daibiao buchongfu
+        cout<<"数据库返回结果："<<res<<endl;
+         //-1 表示不重复
         if(res == -1)
         {
             userpwd1 = getpass("userpwd:");
@@ -136,13 +131,6 @@ reName:
             {
                 // 注册成功
                 cout<<"注册成功"<<endl;
-                // usrName.push_back(username);//进行查重 想法应该错了，这个一次性，应该数据库
-                // char*name=(char*)usrname.c_str();
-                // UsrAcepdata(name);
-                // // 传递用户名
-                // train_t.len = usrname.size();
-                // strcpy(train_t.buf, usrname.c_str());
-                // send(socFd, &train_t, sizeof(train_t.len) + train_t.len, 0);
                 // 传递密码用带有状态的火车协议，对方收三次
                 trainState tStat;
                 tStat.state = REGISTER;
@@ -322,25 +310,25 @@ reName:
 
                 }
             }
-            if (readArr[i].data.fd == socFd)
-            {
-                // 接收信息 ls deng的内容 cd 的内容 
-                while (1)
-                {
+            // if (readArr[i].data.fd == socFd)
+            // {
+            //     // 接收信息 ls deng的内容 cd 的内容 
+            //     while (1)
+            //     {
                     
-                    int length;
-                    ret = recvn(socFd,&length,sizeof(int));
-                    ret = recvn(socFd,BUF,length);
-                    ERROR_CHECK(ret,-1,"recvDuan");
-                    puts(BUF);
-                    if(length == 0)
-                    {
-                        break;
-                    }
-                }
+            //         int length;
+            //         ret = recvn(socFd,&length,sizeof(int));
+            //         ret = recvn(socFd,BUF,length);
+            //         ERROR_CHECK(ret,-1,"recvDuan");
+            //         puts(BUF);
+            //         if(length == 0)
+            //         {
+            //             break;
+            //         }
+            //     }
                 
                
-            }
+            // }
             if(readArr[i].data.fd == getsSocFd)
             {
                 //下载成功
