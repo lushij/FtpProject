@@ -86,56 +86,56 @@ int main(int argc, char *argv[]) //.server ../conf/server.conf
                 recvn(netFd, buf, len);
                 cout << "name=" << buf << endl;
                 bool rest = (stat == CHECKNAME);
-                cout << rest << endl;
-                cout<<"继续";
+                cout <<rest << endl;
+                
                 /***********************错误*********************************/
-                // if (stat == CHECKNAME)
-                // {
-                //     // 数据库
-                //     int res = checkName(buf);
-                //     cout << "查重：" << res << endl;
-                //     if (res == -1)
-                //     {
-                //         send(netFd, &res, sizeof(int), 0); // 表示名字可用
-                //         char usrname[1024] = {0};
-                //         strcpy(usrname, buf); // 存储 name;
-                //         bzero(buf, sizeof(buf));
-                //         len = 0;
-                //         recvn(netFd, &len, sizeof(int)); // 先获取长度
-                //         recvn(netFd, &stat, sizeof(int));
-                //         recvn(netFd, buf, len);
-                //         cout << buf << endl;
-                //         if (stat == REGISTER)
-                //         {
-                //             // 注册
-                //             // 创建 salt
-                //             char *randStr = getSalt();
-                //             char salt[128] = {0};
-                //             sprintf(salt, "$6$%s$", randStr);
-                //             // 生成密文
-                //             char *cryptPwd = crypt(buf, salt);
-                //             // 存储到数据库
-                //             saveServerInfo(usrname, salt, cryptPwd, 0);
-                //             // 存入数据库文件表
-                //             //  dataInsert(0,NULL,);
-                //             // 生成token   token 存入数据库并发送客户端
-                //             char *tokStr = getSalt();
-                //             char token[128] = {0};
-                //             sprintf(token, "$token$%s$%s", usrname, tokStr);
-                //             // 存入数据库
-                //             saveServerToken(usrname, token);
-                //             // 发送token
-                //             Train stat_t;
-                //             stat_t.len = strlen(token) + 1;
-                //             strcpy(stat_t.buf, token);
-                //             send(netFd, &stat_t, sizeof(stat_t.len) + stat_t.len, 0);
-                //         }
-                //     }
-                //     else
-                //     {
-                //         send(netFd, &res, sizeof(int), 0); // no
-                //     }
-                // }
+                if (stat == CHECKNAME)
+                {
+                    // 数据库
+                    int res = checkName(buf);
+                    cout << "查重：" << res << endl;
+                    if (res == -1)
+                    {
+                        send(netFd, &res, sizeof(int), 0); // 表示名字可用
+                        char usrname[1024] = {0};
+                        strcpy(usrname, buf); // 存储 name;
+                        bzero(buf, sizeof(buf));
+                        len = 0;
+                        recvn(netFd, &len, sizeof(int)); // 先获取长度
+                        recvn(netFd, &stat, sizeof(int));
+                        recvn(netFd, buf, len);
+                        cout << buf << endl;
+                        if (stat == REGISTER)
+                        {
+                            // 注册
+                            // 创建 salt
+                            char *randStr = getSalt();
+                            char salt[128] = {0};
+                            sprintf(salt, "$6$%s$", randStr);
+                            // 生成密文
+                            char *cryptPwd = crypt(buf, salt);
+                            // 存储到数据库
+                            saveServerInfo(usrname, salt, cryptPwd, 0);
+                            // 存入数据库文件表
+                            //  dataInsert(0,NULL,);
+                            // 生成token   token 存入数据库并发送客户端
+                            char *tokStr = getSalt();
+                            char token[128] = {0};
+                            sprintf(token, "$token$%s$%s", usrname, tokStr);
+                            // 存入数据库
+                            saveServerToken(usrname, token);
+                            // 发送token
+                            Train stat_t;
+                            stat_t.len = strlen(token) + 1;
+                            strcpy(stat_t.buf, token);
+                            send(netFd, &stat_t, sizeof(stat_t.len) + stat_t.len, 0);
+                        }
+                    }
+                    else
+                    {
+                        send(netFd, &res, sizeof(int), 0); // no
+                    }
+                }
             }
         }
     }

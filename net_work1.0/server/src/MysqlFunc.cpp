@@ -130,24 +130,25 @@ int checkPwd(char *usrA,char *pwd)
         if(res)
         {
             row=mysql_fetch_row(res);
-            char a[200]={0};
-            char b[200]={0};
-            sprintf(a,"%s",row[3]);
-            sprintf(b,"%s",pwd);
-            if(strcmp(a,b)==0)//匹配密wen成功 返回0  
+            if (row)
             {
-                printf("connect success\n");
-                mysql_free_result(res);
-                mysql_close(conn);
-                return 0;
-            }
-            else 
-            {
+                char a[200]={0};
+                char b[200]={0};
+                sprintf(a,"%s",row[3]);
+                sprintf(b,"%s",pwd);
+                if(strcmp(a,b)==0)//匹配密wen成功 返回0  
+                {
+                    printf("connect success\n");
+                    mysql_free_result(res);
+                    mysql_close(conn);
+                    return 0;
+                }
+            }  
                 printf("fail\n");
                 mysql_free_result(res);
                 mysql_close(conn);
                 return -1;
-            }
+            
         }
     }
 }
@@ -168,26 +169,21 @@ int checkName (char *name)
         if(res)
         {
             row=mysql_fetch_row(res);
-            char a[200]={0};
-            char b[200]={0};
-            sprintf(a,"%s",row[1]);
-            sprintf(b,"%s",name);
-            if(strcmp(a,b)==0)//查重姓名成功 返回0  
-            {
+            if(row){
                 printf("connect success\n");
                 mysql_free_result(res);
                 mysql_close(conn);
                 return 0;
             }
-            else 
-            {
+            
+        }
+
                 printf("fail\n");
                 mysql_free_result(res);
                 mysql_close(conn);
                 return -1;
-            }
-        }
     }
+    return -1;
 }
 
 
