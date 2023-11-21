@@ -2,6 +2,7 @@
     "files.associations": {
         "func.h": "c",
         "sstream": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "ostream": "cpp"
     }
 }
